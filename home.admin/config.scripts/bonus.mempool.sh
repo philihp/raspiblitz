@@ -258,21 +258,20 @@ EOF
     echo "# mempool already installed."
   fi
 
-  sudo systemctl start mempool
-
   # setting value in raspi blitz config
   sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=on/g" /mnt/hdd/raspiblitz.conf
   
-  echo "# needs to finish creating txindex to be functional"
-  echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
-
-
   # Hidden Service for Mempool if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh mempool 80 4082 443 4083
   fi
+
+  echo "# needs to finish creating txindex to be functional"
+  echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
+  echo "# reboot or use to start service now: sudo systemctl start mempool"
+
   exit 0
 fi
 
