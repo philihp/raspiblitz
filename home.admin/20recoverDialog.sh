@@ -40,6 +40,9 @@ fi
 if [ "${ElectRS}" = "on" ]; then
   sudo systemctl enable electrs
 fi
+if [ "${mempoolExplorer}" = "on" ]; then
+  sudo systemctl enable mempool
+fi
 
 # remove flag that freshly recovered
 sudo rm /home/admin/raspiblitz.recover.info
