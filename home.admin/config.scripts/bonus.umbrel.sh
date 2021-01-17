@@ -73,9 +73,9 @@ RPC_PASSWORD=$bitcoinRpcPassword
 LND_HOST=127.0.0.1
 LND_PORT=10009
 EOF
-  sudo mv /home/admin/umbrel-middleware.env /home/umbrel/umbrel-middleware.env
-  sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware.env
-  sudo chmod 700 /home/umbrel/umbrel-middleware.env
+  sudo mv /home/admin/umbrel-middleware.env /home/umbrel/umbrel-middleware/.env
+  sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware/.env
+  sudo chmod 700 /home/umbrel/umbrel-middleware/.env
 
   # open firewall
   echo "*** Updating Firewall ***"
@@ -94,7 +94,7 @@ Wants=lnd.service
 After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel/umbrel-middleware
-EnvironmentFile=/home/umbrel/umbrel-middleware.env
+EnvironmentFile=/home/umbrel/umbrel-middleware/.env
 ExecStart=npm start
 User=umbrel
 Restart=always
