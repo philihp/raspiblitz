@@ -65,9 +65,9 @@ if [ "$1" = "install" ] && [ "$2" = "middleware" ]; then
   echo "# *** write ummbrel middleware config ***"
 
   # change of config: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
-  sudu touch /home/umbrel/umbrel-middleware-env.sh
-  sudo chown admin:admin /home/umbrel/umbrel-middleware-env.sh
-  cat > /home/umbrel/umbrel-middleware-env.sh <<EOF
+  sudu touch /home/umbrel/umbrel-middleware.env
+  sudo chown admin:admin /home/umbrel/umbrel-middleware.env
+  cat > /home/umbrel/umbrel-middleware.env <<EOF
 PORT=3005
 BITCOIN_HOST=127.0.0.1
 RPC_USER=$bitcoinRpcUser
@@ -75,8 +75,8 @@ RPC_PASSWORD=$bitcoinRpcPassword
 LND_HOST=127.0.0.1
 LND_PORT=10009
 EOF
-  sudo chmod 600 /home/umbrel/umbrel-middleware-env.sh
-  sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware-env.sh
+  sudo chmod 600 /home/umbrel/umbrel-middleware.env
+  sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware.env
 
   # open firewall
   echo "*** Updating Firewall ***"
@@ -95,7 +95,7 @@ Wants=lnd.service
 After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel/umbrel-middleware
-EnvironmentFile=/home/umbrel/umbrel-middleware-env.sh
+EnvironmentFile=/home/umbrel/umbrel-middleware.env
 ExecStart=npm start
 User=umbrel
 Restart=always
