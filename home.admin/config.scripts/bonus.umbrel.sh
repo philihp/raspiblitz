@@ -4,6 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
  echo "# bonus.umbrel.sh install middleware"
+ echo "# bonus.umbrel.sh off"
  exit 1
 fi
 
@@ -46,7 +47,7 @@ if [ "$1" = "install" ] && [ "$2" = "middleware" ]; then
   sudo -u umbrel git reset --hard v0.1.7
 
   # install
-  echo "# *** Run: yarn ***"
+  echo "# *** run npm install ***"
   cd /home/umbrel/umbrel-middleware
   sudo -u umbrel npm install
   if ! [ $? -eq 0 ]; then
@@ -93,7 +94,7 @@ Description=umbrel-middleware
 Wants=lnd.service
 After=lnd.service
 [Service]
-WorkingDirectory=/home/umbrel
+WorkingDirectory=cd /home/umbrel/umbrel-middleware
 EnvironmentFile=/home/umbrel/umbrel-middleware-env.sh
 ExecStart=npm start
 User=umbrel
