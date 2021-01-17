@@ -67,11 +67,16 @@ if [ "$1" = "install" ] && [ "$2" = "middleware" ]; then
   # change of config: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
   cat > /home/admin/umbrel-middleware.env <<EOF
 PORT=3005
+DEVICE_HOSTS="http://umbrel.local,http://umbrel.local:3005"
 BITCOIN_HOST=127.0.0.1
 RPC_USER=$bitcoinRpcUser
 RPC_PASSWORD=$bitcoinRpcPassword
 LND_HOST=127.0.0.1
+TLS_FILE="/mnt/hdd/lnd/tls.cert"
 LND_PORT=10009
+LND_NETWORK=mainnet
+MACAROON_DIR="/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/"
+JWT_PUBLIC_KEY_FILE=""
 EOF
   sudo mv /home/admin/umbrel-middleware.env /home/umbrel/umbrel-middleware/.env
   sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware/.env
