@@ -94,7 +94,7 @@ Description=umbrel-middleware
 Wants=lnd.service
 After=lnd.service
 [Service]
-WorkingDirectory=cd /home/umbrel/umbrel-middleware
+WorkingDirectory=/home/umbrel/umbrel-middleware
 EnvironmentFile=/home/umbrel/umbrel-middleware-env.sh
 ExecStart=npm start
 User=umbrel
