@@ -62,12 +62,10 @@ if [ "$1" = "install" ] && [ "$2" = "middleware" ]; then
   bitcoinRpcPassword=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep 'rpcpassword=' | cut -d '=' -f2)
 
   # prepare RTL-Config.json file
-  echo "# *** write ummbrel middleware config ***"
+  echo "# *** write umbrel middleware config ***"
 
   # change of config: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
-  sudu touch /home/umbrel/umbrel-middleware.env
-  sudo chown admin:admin /home/umbrel/umbrel-middleware.env
-  cat > /home/umbrel/umbrel-middleware.env <<EOF
+  cat > /home/admin/umbrel-middleware.env <<EOF
 PORT=3005
 BITCOIN_HOST=127.0.0.1
 RPC_USER=$bitcoinRpcUser
@@ -75,8 +73,9 @@ RPC_PASSWORD=$bitcoinRpcPassword
 LND_HOST=127.0.0.1
 LND_PORT=10009
 EOF
-  sudo chmod 600 /home/umbrel/umbrel-middleware.env
+  sudo mv /home/admin/umbrel-middleware.env /home/umbrel/umbrel-middleware.env
   sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware.env
+  sudo chmod 700 /home/umbrel/umbrel-middleware.env
 
   # open firewall
   echo "*** Updating Firewall ***"
