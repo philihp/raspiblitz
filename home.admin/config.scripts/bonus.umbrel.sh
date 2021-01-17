@@ -67,7 +67,7 @@ if [ "$1" = "install" ] && [ "$2" = "middleware" ]; then
   # change of config: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
   sudu touch /home/umbrel/umbrel-middleware-env.sh
   sudo chown admin:admin /home/umbrel/umbrel-middleware-env.sh
-  cat <<EOF > /home/umbrel/umbrel-middleware-env.sh
+  cat > /home/umbrel/umbrel-middleware-env.sh <<EOF
 PORT=3005
 BITCOIN_HOST=127.0.0.1
 RPC_USER=$bitcoinRpcUser
