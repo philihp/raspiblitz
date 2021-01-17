@@ -7,8 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# check and load raspiblitz config
-# to know which network is running
+# check and load raspiblitz config & info file
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
@@ -111,8 +110,14 @@ EOF
   sudo mv /home/admin/umbrel-middleware.service /etc/systemd/system/umbrel-middleware.service
   sudo chown root:root /etc/systemd/system/umbrel-middleware.service
   sudo systemctl enable umbrel-middleware.service
-  echo "OK - the umbrel-middleware service is now enabled"
+  echo "# umbrel-middleware service is now enabled"
 
+  if [ "${setupStep}" == "100" ]; then
+    sudo systemctl start umbrel-middleware.service
+    echo "OK - the umbrel-middleware service got started"
+  else
+    echo "OK - will start after reboot"
+  fi
 
   exit 0
 fi
