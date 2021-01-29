@@ -54,7 +54,7 @@ fi
 if [ "$1" = "install" ]; then
 
   # check if umbrel user directory exists
-  if ! [ -d "/home/umbrel" ]; then
+  if [ -d "/home/umbrel" ]; then
     echo "error='already installed'"
     exit 1
   fi
