@@ -25,10 +25,18 @@ if [ "$1" = "status" ]; then
     # check if service is running
     middlewareRunning=$(sudo systemctl status umbrel-middleware 2>/dev/null | grep -c "active (running)")
     echo "middlewareRunning=${middlewareRunning}"
+    if [ "${middlewareRunning}" == "0" ]; then
+      echo "# WARNING: systemd service for middleware not running"
+      echo "# check --> sudo systemctl status umbrel-middleware"
+    fi    
 
     # check if local ping is working
     middlewarePing=$(curl http://127.0.0.1:3005/ping 2>/dev/null | grep -c "umbrel-middleware-")
     echo "middlewarePing=${middlewarePing}"
+    if [ "${middlewarePing}" == "0" ]; then
+      echo "# WARNING: middleware nodjs not responding locally on port 3005"
+      echo "# check --> sudo journalctl -u umbrel-middleware"
+    fi  
 
   else
     echo "middlewareService=off"  
