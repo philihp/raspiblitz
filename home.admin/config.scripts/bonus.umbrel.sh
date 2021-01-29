@@ -4,6 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
  echo "# bonus.umbrel.sh install middleware"
+ echo "# bonus.umbrel.sh status"
  echo "# bonus.umbrel.sh off"
  exit 1
 fi
@@ -12,10 +13,26 @@ fi
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+# status
+if [ "$1" = "status" ]; then
+
+  echo "# *** Umbrel Status -> Middleware ***"
+
+  if [ -f "/etc/systemd/system/umbrel-middleware.service" ]; then
+    echo "middlewareService=on"  
+  else
+    echo "middlewareService=off"  
+  fi
+
+  middlewareRunning=$(sudo systemctl status umbrel-middleware | grep -c "active (running)")
+  echo "middlewareRunning=${middlewareRunning}"
+
+fi
+
 # switch on
 if [ "$1" = "install" ] && [ "$2" = "middleware" ]; then
 
-  echo "*** INSTALL umbrel-middleware ***"
+  echo "# *** INSTALL umbrel-middleware ***"
 
   isInstalled=$(sudo ls /etc/systemd/system/umbrel-middleware.service 2>/dev/null | grep -c 'umbrel-middleware.service')
   if ! [ ${isInstalled} -eq 0 ]; then
