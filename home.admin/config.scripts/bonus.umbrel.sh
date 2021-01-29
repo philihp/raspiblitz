@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TODOS:
+# - if password B is changed from RaspBlitz ... also change in /home/umbrel/umbrel-middleware/.env
+
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
@@ -16,7 +20,7 @@ source /mnt/hdd/raspiblitz.conf
 # status
 if [ "$1" = "status" ]; then
 
-  echo "# *** Umbrel Status -> Middleware ***"
+  echo "# *** Umbrel Middleware -> umbrel-middleware.service ***"
 
   # check if service is installed
   if [ -f "/etc/systemd/system/umbrel-middleware.service" ]; then
@@ -100,7 +104,7 @@ if [ "$1" = "install" ] && [ "$2" = "middleware" ]; then
   # change of config: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
   cat > /home/admin/umbrel-middleware.env <<EOF
 PORT=3005
-DEVICE_HOSTS="http://umbrel.local,http://umbrel.local:3005"
+DEVICE_HOSTS="http://localhost:3005,http://127.0.0.1:3005"
 BITCOIN_HOST=127.0.0.1
 RPC_USER=$bitcoinRpcUser
 RPC_PASSWORD=$bitcoinRpcPassword
