@@ -47,6 +47,32 @@ if [ "$1" = "status" ]; then
     echo "middlewareService=off"  
   fi
 
+  echo "# *** Umbrel Manager -> umbrel-manager.service ***"
+
+ # check if service is installed
+  if [ -f "/etc/systemd/system/umbrel-manager.service" ]; then
+    echo "managerService=on"  
+
+    # check if service is running
+    managerRunning=$(sudo systemctl status umbrel-manager 2>/dev/null | grep -c "active (running)")
+    echo "managerRunning=${managerRunning}"
+    if [ "${managerRunning}" == "0" ]; then
+      echo "# WARNING: systemd service for manager not running"
+      echo "# check --> sudo systemctl status umbrel-manager"
+    fi    
+
+    # check if local ping is working
+    managerPing=$(curl http://127.0.0.1:3006/ping 2>/dev/null | grep -c "umbrel-manager-")
+    echo "managerPing=${managerPing}"
+    if [ "${managerPing}" == "0" ]; then
+      echo "# WARNING: manager nodjs not responding locally on port 3005"
+      echo "# check --> sudo journalctl -u umbrel-manager"
+    fi  
+
+  else
+    echo "managerService=off"  
+  fi
+
   exit 0
 fi
 
