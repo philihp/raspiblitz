@@ -8,7 +8,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
- echo "# bonus.umbrel.sh install"
+ echo "# bonus.umbrel.sh on"
  echo "# bonus.umbrel.sh status"
  echo "# bonus.umbrel.sh off"
  exit 1
@@ -51,7 +51,7 @@ if [ "$1" = "status" ]; then
 fi
 
 # switch on
-if [ "$1" = "install" ]; then
+if [ "$1" = "on" ] || [ "$1" = "1" ]; then
 
   # check if umbrel user directory exists
   if [ -d "/home/umbrel" ]; then
