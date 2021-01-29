@@ -18,15 +18,23 @@ if [ "$1" = "status" ]; then
 
   echo "# *** Umbrel Status -> Middleware ***"
 
+  # check if service is installed
   if [ -f "/etc/systemd/system/umbrel-middleware.service" ]; then
     echo "middlewareService=on"  
+
+    # check if service is running
+    middlewareRunning=$(sudo systemctl status umbrel-middleware 2>/dev/null | grep -c "active (running)")
+    echo "middlewareRunning=${middlewareRunning}"
+
+    # check if local ping is working
+    middlewarePing=$(curl http://127.0.0.1:3005/ping 2>/dev/null | grep -c "umbrel-middleware-")
+    echo "middlewarePing=${middlewarePing}"
+
   else
     echo "middlewareService=off"  
   fi
 
-  middlewareRunning=$(sudo systemctl status umbrel-middleware | grep -c "active (running)")
-  echo "middlewareRunning=${middlewareRunning}"
-
+  exit 0
 fi
 
 # switch on
