@@ -11,7 +11,12 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
  echo "# bonus.umbrel.sh on"
  echo "# bonus.umbrel.sh status"
+ echo "# bonus.umbrel.sh patch [manager|middleware] [githubUser] [githubBranch]"
  echo "# bonus.umbrel.sh off"
+ echo "####################################"
+ echo "# To follow logs:"
+ echo "# sudo journalctl -u umbrel-manager -f"
+ echo "# sudo journalctl -u umbrel-middleware -f"
  exit 1
 fi
 
@@ -216,6 +221,13 @@ EOF
       echo "# OK - install done"
   fi
 
+  # prepare needed files for config (if not existing yet)
+  if ! [ -f "/mnt/hdd/app-data/umbrel/update-status.json" ]; then
+    echo '{"state": "success","progress": 100,"description": "","updateTo": ""}' > /home/admin/template.tmp
+    sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/update-status.json
+    sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/update-status.json
+  fi
+
   # prepare Config file
   # see details: https://github.com/getumbrel/umbrel-manager#step-2-set-environment-variables
   echo "# *** write umbrel manager config ***"
@@ -341,6 +353,58 @@ EOF
   sudo chmod 755 -R /home/umbrel/umbrel-dashboard/dist
 
   exit 0
+fi
+
+# update (for development)
+if [ "$1" = "update" ]; then
+
+    # get parameter
+    repo=$2
+    user=$3
+    branch=$4
+
+    # check & set default parameter values
+    if [ "${branch}" = "" ]; then
+      branch="master"
+    fi
+    if [ "${user}" = "" ]; then
+      user="rootzoll"
+    fi
+    if [ "${repo}" != "middleware" ] && [ "${repo}" != "manager" ]; then
+      echo "error='wrong parameter'"
+      exit 1
+    fi
+
+    echo "# stopping systemd service"
+    sudo systemctl stop umbrel-${repo}
+
+    echo "# checksum of pre-update package.json "
+    preChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
+    echo "# --> ${preChecksum}"
+
+    echo "# updating from: github.com/${user}/umbrel-${repo} branch(${branch})"
+    cd /home/umbrel/umbrel-${repo}
+    sudo -u umbrel git remote set-url origin https://github.com/${user}/umbrel-${repo}.git
+    sudo -u umbrel git fetch
+    sudo -u umbrel git checkout -b ${branch} origin/${branch}
+
+    echo "# checksum of post-update package.json "
+    postChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
+    echo "# --> ${postChecksum}"
+
+    echo "# check if update of dependencies is needed"
+    if [ "${preChecksum}" = "${postChecksum}" ]; then
+      echo "# --> nothing changed"
+    else
+      echo "# --> change detected --> running npm install"
+      sudo -u umbrel npm install
+    fi
+
+    echo "# starting systemd service"
+    sudo systemctl start umbrel-${repo}
+    
+    echo "# done"
+    exit 0
 fi
 
 # switch off
