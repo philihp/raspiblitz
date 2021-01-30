@@ -410,13 +410,13 @@ if [ "$1" = "update" ]; then
 
     echo "# check if update of dependencies is needed"
     if [ "${preChecksum}" = "${postChecksum}" ]; then
-      echo "# --> nothing changed"
+      echo "# --> no new dependencies"
     else
       echo "# --> change detected --> running npm install"
       sudo -u umbrel npm install
     fi
 
-    echo "# starting systemd service"
+    echo "# starting systemd umbrel-${repo}"
     sudo systemctl start umbrel-${repo}
     
     echo "# done"
