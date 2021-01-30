@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
  echo "# bonus.umbrel.sh on"
  echo "# bonus.umbrel.sh status"
- echo "# bonus.umbrel.sh patch [manager|middleware] [githubUser] [githubBranch]"
+ echo "# bonus.umbrel.sh update [manager|middleware] [githubUser] [githubBranch]"
  echo "# bonus.umbrel.sh off"
  echo "####################################"
  echo "# To follow logs:"
