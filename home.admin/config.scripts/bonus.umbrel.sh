@@ -366,6 +366,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # delete umbrel user and hoke directory
+  echo "# *** REMOVING user umbrel ***"
   sudo userdel -rf umbrel
 
   echo "# needs reboot to activate new setting"
