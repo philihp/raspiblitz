@@ -326,41 +326,19 @@ EOF
   sudo chown umbrel:umbrel /home/umbrel/umbrel-dashboard/.env
   sudo chmod 700 /home/umbrel/umbrel-dashboard/.env
 
-  # install service
-  echo "*** Install umbrel-dashboard systemd ***"
-  cat > /home/admin/umbrel-dashboard.service <<EOF
-# Systemd unit for umbrel-dashboard
-
-[Unit]
-Description=umbrel-dashboard
-Wants=lnd.service
-After=lnd.service
-[Service]
-WorkingDirectory=/home/umbrel/umbrel-dashboard
-EnvironmentFile=/home/umbrel/umbrel-dashboard/.env
-ExecStart=npm start
-User=umbrel
-Restart=always
-TimeoutSec=120
-RestartSec=30
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-  sudo mv /home/admin/umbrel-dashboard.service /etc/systemd/system/umbrel-dashboard.service
-  sudo chown root:root /etc/systemd/system/umbrel-dashboard.service
-  sudo systemctl enable umbrel-dashboard.service
-  echo "# umbrel-dashboard service is now enabled"
-
-  if [ "${setupStep}" == "100" ]; then
-    sudo systemctl start umbrel-dashboard.service
-    echo "OK - the umbrel-dashboard service got started"
+  # npm build
+  echo "# *** run npm build ***"
+  cd /home/umbrel/umbrel-dashboard
+  sudo -u umbrel npm run-script build
+  if ! [ $? -eq 0 ]; then
+      echo "error='npm build failed of umbrel-dashboard'"
+      exit 1
   else
-    echo "OK - will start after reboot"
+      echo "# OK - build done"
   fi
+
+  # make sure the dashbaord can be served by nginx
+  sudo chmod 755 -R /home/umbrel/umbrel-dashboard/dist
 
   exit 0
 fi
