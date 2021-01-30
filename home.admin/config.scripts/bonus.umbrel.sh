@@ -387,7 +387,7 @@ if [ "$1" = "update" ]; then
     sudo -u umbrel git remote set-url origin https://github.com/${user}/umbrel-${repo}.git
 
     echo "# checking if branch is locally available"
-    localBranch=$(git branch | grep -c "${branch}")
+    localBranch=$(sudo -u umbrel git branch | grep -c "${branch}")
     if [ ${localBranch} -eq 0 ]; then
       echo "# checking branch exists .."
       branchExists=$(curl -s https://api.github.com/repos/${user}/umbrel-${repo}/branches/${branch} | jq -r '.name' | grep -c ${branch})
@@ -396,13 +396,13 @@ if [ "$1" = "update" ]; then
         exit 1
       fi
       echo "# checkout branch .."
-      git fetch
-      git checkout -b ${branch} origin/${branch}
+      sudo -u umbrel git fetch
+      sudo -u umbrel git checkout -b ${branch} origin/${branch}
     else
       echo "# setting branch .."
-      git checkout ${branch}
+      sudo -u umbrel git checkout ${branch}
     fi
-    git pull 1>&2
+    sudo -u umbrel git pull 1>&2
 
     echo "# checksum of post-update package.json "
     postChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
