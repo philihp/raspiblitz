@@ -4,6 +4,7 @@
 # - if password B is changed from RaspBlitz ... also change in umbrel-middleware & manager
 # - create dashboard tor servive and link in manager config 
 # - do BITCOIN_P2P_HIDDEN_SERVICE_FILE correct
+# - change port of dashboard from 8080 .. collusion with LND-REST 
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -293,6 +294,73 @@ EOF
   echo "*** Updating Firewall ***"
   sudo ufw allow 3006 comment 'umbrel-test HTTP'
   echo ""
+
+  echo "# *** Umbrel Dashboard -> umbrel-dashboard.service ***"
+
+  # download source code and set to tag release
+  echo "# *** get the umbrel dashboard source code ***"
+  sudo rm -rf /home/umbrel/umbrel-dashboard 2>/dev/null
+  sudo -u umbrel git clone https://github.com/getumbrel/umbrel-dashboard.git /home/umbrel/umbrel-dashboard
+  cd /home/umbrel/umbrel-dashboard
+  sudo -u umbrel git reset --hard v0.3.15
+
+  # install
+  echo "# *** run npm install ***"
+  cd /home/umbrel/umbrel-dashboard
+  sudo -u umbrel npm install
+  if ! [ $? -eq 0 ]; then
+      echo "error='npm install failed of umbrel-dashboard'"
+      exit 1
+  else
+      echo "# OK - install done"
+  fi
+
+  # prepare Config file
+  # see details: https://github.com/getumbrel/umbrel-dashboard#step-2-set-environment-variables
+  echo "# *** write umbrel dashboard config ***"
+  cat > /home/admin/umbrel-dashboard.env <<EOF
+VUE_APP_MANAGER_API_URL="http://localhost:3006"
+VUE_APP_MIDDLEWARE_API_URL="http://localhost:3005"
+EOF
+  sudo mv /home/admin/umbrel-dashboard.env /home/umbrel/umbrel-dashboard/.env
+  sudo chown umbrel:umbrel /home/umbrel/umbrel-dashboard/.env
+  sudo chmod 700 /home/umbrel/umbrel-dashboard/.env
+
+  # install service
+  echo "*** Install umbrel-dashboard systemd ***"
+  cat > /home/admin/umbrel-dashboard.service <<EOF
+# Systemd unit for umbrel-dashboard
+
+[Unit]
+Description=umbrel-dashboard
+Wants=lnd.service
+After=lnd.service
+[Service]
+WorkingDirectory=/home/umbrel/umbrel-dashboard
+EnvironmentFile=/home/umbrel/umbrel-dashboard/.env
+ExecStart=npm start
+User=umbrel
+Restart=always
+TimeoutSec=120
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo mv /home/admin/umbrel-dashboard.service /etc/systemd/system/umbrel-dashboard.service
+  sudo chown root:root /etc/systemd/system/umbrel-dashboard.service
+  sudo systemctl enable umbrel-dashboard.service
+  echo "# umbrel-dashboard service is now enabled"
+
+  if [ "${setupStep}" == "100" ]; then
+    sudo systemctl start umbrel-dashboard.service
+    echo "OK - the umbrel-dashboard service got started"
+  else
+    echo "OK - will start after reboot"
+  fi
 
   exit 0
 fi
