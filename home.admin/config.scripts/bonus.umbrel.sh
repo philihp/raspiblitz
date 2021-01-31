@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
  echo "# bonus.umbrel.sh on"
  echo "# bonus.umbrel.sh status"
- echo "# bonus.umbrel.sh update [manager|middleware] [githubUser] [githubBranch]"
+ echo "# bonus.umbrel.sh update [manager|middleware|dashboard] [githubUser] [githubBranch]"
  echo "# bonus.umbrel.sh off"
  echo "####################################"
  echo "# To follow logs:"
@@ -345,9 +345,8 @@ EOF
   if ! [ $? -eq 0 ]; then
       echo "error='npm build failed of umbrel-dashboard'"
       exit 1
-  else
-      echo "# OK - build done"
   fi
+  echo "# OK - build done"
 
   # make sure the dashbaord can be served by nginx
   sudo chmod 755 -R /home/umbrel/umbrel-dashboard/dist
@@ -370,13 +369,15 @@ if [ "$1" = "update" ]; then
     if [ "${user}" = "" ]; then
       user="rootzoll"
     fi
-    if [ "${repo}" != "middleware" ] && [ "${repo}" != "manager" ]; then
+    if [ "${repo}" != "middleware" ] && [ "${repo}" != "manager" ] && [ "${repo}" != "dashboard" ]; then
       echo "error='wrong parameter'"
       exit 1
     fi
 
-    echo "# stopping systemd service"
-    sudo systemctl stop umbrel-${repo}
+    if [ "${repo}" != "dashboard" ]; then
+      echo "# stopping systemd service" 
+      sudo systemctl stop umbrel-${repo}
+    fi
 
     echo "# checksum of pre-update package.json "
     preChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
@@ -416,8 +417,20 @@ if [ "$1" = "update" ]; then
       sudo -u umbrel npm install
     fi
 
-    echo "# starting systemd umbrel-${repo}"
-    sudo systemctl start umbrel-${repo}
+    if [ "${repo}" = "dashboard" ]; then
+      echo "# *** run npm build ***"
+      cd /home/umbrel/umbrel-dashboard
+      sudo -u umbrel npm run-script build
+      if ! [ $? -eq 0 ]; then
+        echo "error='npm build failed of umbrel-dashboard'"
+        exit 1
+      fi
+      sudo chmod 755 -R /home/umbrel/umbrel-dashboard/dist
+      echo "# OK - build done"
+    else
+      echo "# starting systemd umbrel-${repo}"
+      sudo systemctl start umbrel-${repo} 2>/dev/null    
+    fi
     
     echo "# done"
     exit 0
