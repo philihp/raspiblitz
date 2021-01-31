@@ -5,6 +5,7 @@
 # - create dashboard tor servive and link in manager config 
 # - do BITCOIN_P2P_HIDDEN_SERVICE_FILE correct
 # - change port of dashboard from 8080 .. collusion with LND-REST 
+# - change name/password also in USER_FILE if changed outside
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -223,9 +224,14 @@ EOF
 
   # prepare needed files for config (if not existing yet)
   if ! [ -f "/mnt/hdd/app-data/umbrel/update-status.json" ]; then
-    echo '{"state": "success","progress": 100,"description": "","updateTo": ""}' > /home/admin/template.tmp
+    echo -e '{\n"state": "success",\n"progress": 100,\n"description": "",\n"updateTo": ""\n}' > /home/admin/template.tmp
     sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/update-status.json
     sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/update-status.json
+  fi
+  if ! [ -f "/mnt/hdd/app-data/umbrel/user.json" ]; then
+    echo -e "{\n\"name\": \"$hostname\",\n\"password\": \"$bitcoinRpcPassword\",\n\"seed\": \"\",\n\"installedApps\": []\n}" > /home/admin/template.tmp
+    sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/user.json
+    sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/user.json
   fi
 
   # prepare Config file
