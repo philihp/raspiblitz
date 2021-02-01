@@ -119,7 +119,7 @@ if [ "$1" = "on" ] || [ "$1" = "1" ]; then
   sudo mkdir /mnt/hdd/app-data/umbrel 2>/dev/null
   sudo chown -R umbrel:umbrel /mnt/hdd/app-data/umbrel
 
-  # make sure that the tor hostnames are readyble for umbrel
+  # make sure that the tor hostnames are readable for umbrel
   sudo chmod 644 /mnt/hdd/tor/web80/hostname
   sudo chmod 644 /mnt/hdd/tor/electrs/hostname
   sudo chmod 644 /mnt/hdd/tor/bitcoin8332/hostname
@@ -474,6 +474,31 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# needs reboot to activate new setting"
   exit 0
+fi
+
+# install and run manager & middleware in docker
+if [ "$1" = "on-docker" ]; then
+  
+  # create umbrel user
+  sudo adduser --disabled-password --gecos "" umbrel
+
+  # make sure umbrel is member of lndadmin
+  sudo /usr/sbin/usermod --append --groups lndadmin umbrel
+
+  # make sure that docker is installed
+  /home/admin/config.scripts/bonus.docker.sh on
+
+  # add umbrel user to docker group
+  sudo usermod -aG docker umbrel
+
+  # download source code for middleware and build docker
+  echo "# *** get the umbrel middleware source code ***"
+  sudo rm -rf /home/umbrel/umbrel-middleware 2>/dev/null
+  sudo -u umbrel git clone https://github.com/getumbrel/umbrel-middleware.git /home/umbrel/umbrel-middleware
+  cd /home/umbrel/umbrel-middleware
+  sudo -u umbrel git reset --hard v0.1.7
+  docker build
+
 fi
 
 echo "error='unknown parameter'"

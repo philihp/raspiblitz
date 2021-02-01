@@ -17,7 +17,7 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  echo "### INSTALL DOCKER ###"
+  echo "### 1) INSTALL docker ###"
 
   # check if docker is installed
   isInstalled=$(docker -v 2>/dev/null | grep -c "Docker version")
@@ -34,6 +34,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # add admin user
   sudo usermod -aG docker admin
 
+  echo "### 2) INSTALL docker-compose ###"
+
+  # add docker compose
+  sudo pip3 install docker-compose
+
   # setting value in raspi blitz config
   sudo sed -i "s/^docker=.*/docker=on/g" /mnt/hdd/raspiblitz.conf
   echo "# docker install done"
@@ -44,7 +49,8 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
   sudo sed -i "s/^docker=.*/docker=off/g" /mnt/hdd/raspiblitz.conf
-  echo "*** REMOVING Docker ***"
+  echo "*** REMOVING docker & docker-compose ***"
+  sudo pip3 uninstall -y docker-compose
   sudo apt-get purge -y docker-ce docker-ce-cli
   echo "# docker remove done"
   exit 0
