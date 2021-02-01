@@ -45,7 +45,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
   sudo sed -i "s/^docker=.*/docker=off/g" /mnt/hdd/raspiblitz.conf
   echo "*** REMOVING Docker ***"
-  sudo rm -rf /var/lib/docker /etc/docker
+  sudo apt-get purge -y docker-ce docker-ce-cli
   echo "# docker remove done"
   exit 0
 fi
