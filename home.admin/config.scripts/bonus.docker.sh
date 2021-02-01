@@ -21,7 +21,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if docker is installed
   isInstalled=$(docker -v 2>/dev/null | grep -c "Docker version")
-  if [ ${isInstalled} -eq 0 ]; then
+  if [ ${isInstalled} -eq 1 ]; then
     echo "error='already installed'"
     exit 1
   fi
