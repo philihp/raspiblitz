@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# NOTES:
+# how to ssh into a umbrel node for comparing: https://github.com/getumbrel/umbrel-os#-ssh
+
 # TODOS:
 # - if password B is changed from RaspBlitz ... also change in umbrel-middleware & manager
 # - create dashboard tor servive and link in manager config 
@@ -11,6 +14,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
  echo "# bonus.umbrel.sh on"
+ echo "# bonus.umbrel.sh on-docker"
  echo "# bonus.umbrel.sh status"
  echo "# bonus.umbrel.sh update [manager|middleware|dashboard] [githubUser] [githubBranch]"
  echo "# bonus.umbrel.sh off"
