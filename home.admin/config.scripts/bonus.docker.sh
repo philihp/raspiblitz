@@ -17,14 +17,22 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
+  echo "### INSTALL DOCKER ###"
+
   # check if docker is installed
-  isInstalled=$(docker -v 2>/dev/null | grep -c "docker")
-  echo "installed=${isInstalled}"
+  isInstalled=$(docker -v 2>/dev/null | grep -c "Docker version")
+  if [ ${isInstalled} -eq 0 ]; then
+    echo "error='already installed'"
+    exit 1
+  fi
 
   # run easy install script provided by docker
   # its a copy from https://get.docker.com
   sudo chmod +x /home/admin/assets/get-docker.sh
   sudo /home/admin/assets/get-docker.sh
+
+  # add admin user
+  sudo usermod -aG docker admin
 
   # setting value in raspi blitz config
   sudo sed -i "s/^docker=.*/docker=on/g" /mnt/hdd/raspiblitz.conf
