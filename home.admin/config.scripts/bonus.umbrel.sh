@@ -456,6 +456,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/umbrel-middleware.service 2>/dev/null | grep -c 'umbrel-middleware.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "# *** REMOVING umbrel-middleware ***"
+    sudo systemctl stop umbrel-middleware
     sudo systemctl disable umbrel-middleware
     sudo rm /etc/systemd/system/umbrel-middleware.service
   fi
@@ -464,6 +465,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/umbrel-manager.service 2>/dev/null | grep -c 'umbrel-manager.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "# *** REMOVING umbrel-manager ***"
+    sudo systemctl stop umbrel-manager
     sudo systemctl disable umbrel-manager
     sudo rm /etc/systemd/system/umbrel-manager.service
   fi
