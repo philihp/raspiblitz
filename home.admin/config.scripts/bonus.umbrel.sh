@@ -504,7 +504,7 @@ if [ "$1" = "on-docker" ]; then
   echo "# *** write umbrel middleware config ***"
   cat > /home/admin/umbrel-middleware.env <<EOF
 PORT=3006
-DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006"
+DEVICE_HOSTS="http://localhost:3005,http://127.0.0.1:3005"
 BITCOIN_HOST=127.0.0.1
 RPC_USER=$bitcoinRpcUser
 RPC_PASSWORD=$bitcoinRpcPassword
@@ -531,7 +531,7 @@ After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel/umbrel-middleware
 EnvironmentFile=/home/umbrel/umbrel-middleware/.env
-ExecStart=docker run umbrel-middleware
+ExecStart=docker run -p 3005:3005 umbrel-middleware
 ExecStop=docker stop umbrel-middleware
 User=umbrel
 Restart=always
@@ -549,6 +549,9 @@ EOF
   sudo systemctl enable umbrel-middleware.service
   echo "# umbrel-middleware service is now enabled"
 
+  
+  echo "TODO: finish implementation"
+  exit 0
 fi
 
 echo "error='unknown parameter'"
