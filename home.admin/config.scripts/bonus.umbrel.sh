@@ -497,7 +497,57 @@ if [ "$1" = "on-docker" ]; then
   sudo -u umbrel git clone https://github.com/getumbrel/umbrel-middleware.git /home/umbrel/umbrel-middleware
   cd /home/umbrel/umbrel-middleware
   sudo -u umbrel git reset --hard v0.1.7
-  docker build
+  sudo -u umbrel docker build -t umbrel-middleware .
+  
+  # write enviroment file with config
+  # see details: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
+  echo "# *** write umbrel middleware config ***"
+  cat > /home/admin/umbrel-middleware.env <<EOF
+PORT=3006
+DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006"
+BITCOIN_HOST=127.0.0.1
+RPC_USER=$bitcoinRpcUser
+RPC_PASSWORD=$bitcoinRpcPassword
+LND_HOST=127.0.0.1
+TLS_FILE="/mnt/hdd/lnd/tls.cert"
+LND_PORT=10009
+LND_NETWORK=mainnet
+MACAROON_DIR="/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/"
+JWT_PRIVATE_KEY_FILE="/mnt/hdd/app-data/umbrel/jwt.key"
+EOF
+  sudo mv /home/admin/umbrel-middleware.env /home/umbrel/umbrel-middleware/.env
+  sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware/.env
+  sudo chmod 700 /home/umbrel/umbrel-middleware/.env
+
+  # install service
+  echo "*** Install umbrel systemd ***"
+  cat > /home/admin/umbrel-middleware.service <<EOF
+# Systemd unit for umbrel-middleware
+
+[Unit]
+Description=umbrel-middleware
+Wants=lnd.service
+After=lnd.service
+[Service]
+WorkingDirectory=/home/umbrel/umbrel-middleware
+EnvironmentFile=/home/umbrel/umbrel-middleware/.env
+ExecStart=docker run umbrel-middleware
+ExecStop=docker stop umbrel-middleware
+User=umbrel
+Restart=always
+TimeoutSec=120
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo mv /home/admin/umbrel-middleware.service /etc/systemd/system/umbrel-middleware.service
+  sudo chown root:root /etc/systemd/system/umbrel-middleware.service
+  sudo systemctl enable umbrel-middleware.service
+  echo "# umbrel-middleware service is now enabled"
 
 fi
 
