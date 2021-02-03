@@ -543,7 +543,7 @@ After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel/umbrel-middleware
 EnvironmentFile=/home/umbrel/umbrel-middleware/.env
-ExecStart=docker start umbrel-middleware
+ExecStart=docker start --attach umbrel-middleware
 ExecStop=docker stop umbrel-middleware
 User=umbrel
 Restart=always
