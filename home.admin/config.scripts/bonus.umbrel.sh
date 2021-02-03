@@ -459,7 +459,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop umbrel-middleware
     sudo systemctl disable umbrel-middleware
     sudo rm /etc/systemd/system/umbrel-middleware.service
-    systemctl daemon-reload
+    sudo systemctl daemon-reload
   fi
 
   # uninstall umbrel-middelware
@@ -469,7 +469,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop umbrel-manager
     sudo systemctl disable umbrel-manager
     sudo rm /etc/systemd/system/umbrel-manager.service
-    systemctl daemon-reload
+    sudo systemctl daemon-reload
   fi
 
   # delete the docker images
