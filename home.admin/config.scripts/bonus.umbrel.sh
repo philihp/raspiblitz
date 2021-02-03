@@ -499,14 +499,18 @@ if [ "$1" = "on-docker" ]; then
   # add umbrel user to docker group
   sudo usermod -aG docker umbrel
 
-  # download source code for middleware and build docker
+  # download source code
   echo "# *** get the umbrel middleware source code ***"
   sudo rm -rf /home/umbrel/umbrel-middleware 2>/dev/null
   sudo -u umbrel git clone https://github.com/getumbrel/umbrel-middleware.git /home/umbrel/umbrel-middleware
   cd /home/umbrel/umbrel-middleware
   sudo -u umbrel git reset --hard v0.1.7
+
+  # build docker image and create constainer
   sudo -u umbrel docker build -t umbrel-middleware .
-  
+  docker run -d -p 3005:3005 --name umbrel-middleware umbrel-middleware
+  docker stop umbrel-middleware
+
   # write enviroment file with config
   # see details: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
   echo "# *** write umbrel middleware config ***"
@@ -539,7 +543,7 @@ After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel/umbrel-middleware
 EnvironmentFile=/home/umbrel/umbrel-middleware/.env
-ExecStart=docker run -p 3005:3005 umbrel-middleware
+ExecStart=docker start umbrel-middleware
 ExecStop=docker stop umbrel-middleware
 User=umbrel
 Restart=always
