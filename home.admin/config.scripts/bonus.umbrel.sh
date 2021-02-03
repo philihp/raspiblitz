@@ -473,8 +473,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # delete the docker images
-  docker image rm -f $(docker images 'umbrel-middleware' -a -q)
-  docker image rm -f $(docker images 'umbrel-manager' -a -q)
+  docker image rm -f $(docker images 'umbrel-middleware' -a -q) 2>/dev/null
+  docker image rm -f $(docker images 'umbrel-manager' -a -q) 2>/dev/null
 
   # delete umbrel user and hoke directory
   echo "# *** REMOVING user umbrel ***"
