@@ -472,6 +472,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     systemctl daemon-reload
   fi
 
+  # delete the docker images
+  docker image rm -f $(docker images 'umbrel-middleware' -a -q)
+  docker image rm -f $(docker images 'umbrel-manager' -a -q)
+
   # delete umbrel user and hoke directory
   echo "# *** REMOVING user umbrel ***"
   sudo userdel -rf umbrel
