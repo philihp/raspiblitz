@@ -455,20 +455,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # uninstall umbrel-middelware
   isInstalled=$(sudo ls /etc/systemd/system/umbrel-middleware.service 2>/dev/null | grep -c 'umbrel-middleware.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "# *** REMOVING umbrel-middleware ***"
-    sudo systemctl stop umbrel-middleware
-    sudo systemctl disable umbrel-middleware
-    sudo rm /etc/systemd/system/umbrel-middleware.service
-    sudo systemctl daemon-reload
-  fi
-
-  # uninstall umbrel-middelware
-  isInstalled=$(sudo ls /etc/systemd/system/umbrel-manager.service 2>/dev/null | grep -c 'umbrel-manager.service')
-  if [ ${isInstalled} -eq 1 ]; then
-    echo "# *** REMOVING umbrel-manager ***"
-    sudo systemctl stop umbrel-manager
-    sudo systemctl disable umbrel-manager
-    sudo rm /etc/systemd/system/umbrel-manager.service
+    echo "# *** REMOVING umbrel service ***"
+    sudo systemctl stop umbrel
+    sudo systemctl disable umbrel
+    sudo rm /etc/systemd/system/umbrel.service
     sudo systemctl daemon-reload
   fi
 
@@ -498,6 +488,7 @@ if [ "$1" = "on-docker" ]; then
 
   # add umbrel user to docker group
   sudo usermod -aG docker umbrel
+  sudo usermod -aG bitcoin umbrel
 
   # download source code
   echo "# *** get the umbrel middleware source code ***"
@@ -508,8 +499,8 @@ if [ "$1" = "on-docker" ]; then
 
   # build docker image and create constainer
   sudo -u umbrel docker build -t umbrel-middleware .
-  docker run -d -p 3005:3005 --name umbrel-middleware umbrel-middleware
-  docker stop umbrel-middleware
+  #docker run -d -p 3005:3005 --name umbrel-middleware umbrel-middleware
+  #docker stop umbrel-middleware
 
   # write enviroment file with config
   # see details: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
@@ -531,20 +522,44 @@ EOF
   sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware/.env
   sudo chmod 700 /home/umbrel/umbrel-middleware/.env
 
+  echo "# *** write umbrel docker-compose for raspiblitz ***"
+  cat > /home/admin/docker-compose.yml <<EOF
+version: '3.7'
+x-logging: &default-logging
+    driver: journald
+    options:
+        tag: "{{.Name}}"
+
+services:
+        middleware:
+                container_name: middleware
+                image: umbrel-middleware
+                logging: *default-logging
+                command: ["npm", "start"]
+                restart: on-failure
+                volumes:
+                        - /mnt/hdd/lnd:/lnd
+                        - /mnt/hdd/app-data/umbrel:/mnt/hdd/app-data/umbrel
+                env_file:
+                        - /home/umbrel/umbrel-middleware/.env
+EOF
+  sudo mv /home/admin/docker-compose.yml /home/umbrel/docker-compose.yml
+  sudo chown umbrel:umbrel /home/umbrel/docker-compose.yml
+  sudo chmod 700 /home/umbrel/docker-compose.yml
+
   # install service
   echo "*** Install umbrel systemd ***"
-  cat > /home/admin/umbrel-middleware.service <<EOF
-# Systemd unit for umbrel-middleware
+  cat > /home/admin/umbrel.service <<EOF
+# Systemd unit for umbrel
 
 [Unit]
-Description=umbrel-middleware
+Description=umbrel
 Wants=lnd.service
 After=lnd.service
 [Service]
-WorkingDirectory=/home/umbrel/umbrel-middleware
-EnvironmentFile=/home/umbrel/umbrel-middleware/.env
-ExecStart=docker start --attach umbrel-middleware
-ExecStop=docker stop umbrel-middleware
+WorkingDirectory=/home/umbrel
+ExecStart=docker-compose up umbrel
+ExecStop=docker-compose down umbrel
 User=umbrel
 Restart=always
 TimeoutSec=120
@@ -561,7 +576,6 @@ EOF
   sudo systemctl enable umbrel-middleware.service
   echo "# umbrel-middleware service is now enabled"
 
-  
   echo "TODO: finish implementation"
   exit 0
 fi
