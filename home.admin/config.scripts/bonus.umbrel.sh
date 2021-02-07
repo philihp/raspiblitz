@@ -493,7 +493,7 @@ if [ "$1" = "on-docker" ]; then
   # download source code
   echo "# *** get the umbrel middleware source code ***"
   sudo rm -rf /home/umbrel/umbrel-middleware 2>/dev/null
-  sudo -u umbrel git clone https://github.com/getumbrel/umbrel-middleware.git /home/umbrel/umbrel-middleware
+  sudo -u umbrel git clone https://github.com/rootzoll/umbrel-middleware.git /home/umbrel/umbrel-middleware
   cd /home/umbrel/umbrel-middleware
   sudo -u umbrel git reset --hard v0.1.7
 
@@ -571,10 +571,10 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-  sudo mv /home/admin/umbrel-middleware.service /etc/systemd/system/umbrel-middleware.service
-  sudo chown root:root /etc/systemd/system/umbrel-middleware.service
-  sudo systemctl enable umbrel-middleware.service
-  echo "# umbrel-middleware service is now enabled"
+  sudo mv /home/admin/umbrel.service /etc/systemd/system/umbrel.service
+  sudo chown root:root /etc/systemd/system/umbrel.service
+  sudo systemctl enable umbrel.service
+  echo "# umbrel service is now enabled"
 
   echo "TODO: finish implementation"
   exit 0
