@@ -463,8 +463,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # delete the docker images
-  docker image rm -f $(docker images 'umbrel-middleware' -a -q) 2>/dev/null
-  docker image rm -f $(docker images 'umbrel-manager' -a -q) 2>/dev/null
+  cd /home/umbrel
+  sudo -u umbrel docker-compose rm -f
+  sudo -u umbrel docker image rm -f $(sudo -u umbrel docker images 'umbrel-middleware' -a -q) 2>/dev/null
+  sudo -u umbrel docker image rm -f $(sudo -u umbrel docker images 'umbrel-manager' -a -q) 2>/dev/null
 
   # delete umbrel user and hoke directory
   echo "# *** REMOVING user umbrel ***"
