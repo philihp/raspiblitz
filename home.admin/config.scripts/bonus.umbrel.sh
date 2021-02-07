@@ -558,8 +558,8 @@ Wants=lnd.service
 After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel
-ExecStart=docker-compose up umbrel
-ExecStop=docker-compose down umbrel
+ExecStart=docker-compose up -d
+ExecStop=docker-compose down
 User=umbrel
 Restart=always
 TimeoutSec=120
