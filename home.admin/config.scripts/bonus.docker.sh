@@ -36,6 +36,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # start docker service
   sudo systemctl start docker
+  sleep 6
 
   echo "### 2) INSTALL docker-compose ###"
 

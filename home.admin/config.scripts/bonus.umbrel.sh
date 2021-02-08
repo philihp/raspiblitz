@@ -560,7 +560,7 @@ Requires=docker.service
 After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel
-ExecStart=docker-compose up -d
+ExecStart=docker-compose up
 ExecStop=docker-compose down
 User=umbrel
 Restart=always
