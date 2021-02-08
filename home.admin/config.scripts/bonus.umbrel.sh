@@ -544,6 +544,8 @@ services:
                         - /mnt/hdd/app-data/umbrel:/mnt/hdd/app-data/umbrel
                 env_file:
                         - /home/umbrel/umbrel-middleware/.env
+                ports:
+                        - "3006:3006"
 EOF
   sudo mv /home/admin/docker-compose.yml /home/umbrel/docker-compose.yml
   sudo chown umbrel:umbrel /home/umbrel/docker-compose.yml
