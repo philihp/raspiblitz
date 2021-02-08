@@ -556,7 +556,7 @@ EOF
 
 [Unit]
 Description=umbrel
-Wants=lnd.service
+Requires=docker.service
 After=lnd.service
 [Service]
 WorkingDirectory=/home/umbrel

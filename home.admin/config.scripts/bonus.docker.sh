@@ -34,6 +34,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # add admin user
   sudo usermod -aG docker admin
 
+  # start docker service
+  sudo systemctl start docker
+
   echo "### 2) INSTALL docker-compose ###"
 
   # add docker compose
