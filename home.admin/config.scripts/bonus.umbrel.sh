@@ -64,7 +64,7 @@ if [ "$1" = "status" ]; then
     fi
 
     # check if http services of containers react to ping
-    pingURL="http://127.0.0.1:3005/ping"
+    pingURL="http://127.0.0.1:3006/ping"
     middlewarePing=$(curl ${pingURL} 2>/dev/null | grep -c "umbrel-middleware-")
     echo "middlewarePing=${middlewarePing}"
     if [ "${middlewarePing}" == "0" ]; then
@@ -72,7 +72,7 @@ if [ "$1" = "status" ]; then
       echo "# check --> curl ${pingURL}"
       echo "# check --> sudo journalctl -u umbrel-middleware"
     fi
-    pingURL="http://127.0.0.1:3006/ping"
+    pingURL="http://127.0.0.1:3005/ping"
     managerPing=$(curl ${pingURL} 2>/dev/null | grep -c "umbrel-manager-")
     echo "managerPing=${managerPing}"
     if [ "${managerPing}" == "0" ]; then
@@ -614,7 +614,7 @@ USER_FILE="/mnt/hdd/app-data/umbrel/user.json"
 SHUTDOWN_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/shutdown.signal"
 REBOOT_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/reboot.signal"
 MIDDLEWARE_API_URL="http://localhost"
-MIDDLEWARE_API_PORT=3005
+MIDDLEWARE_API_PORT=3006
 JWT_PUBLIC_KEY_FILE="/mnt/hdd/app-data/umbrel/jwt.pem"
 JWT_PRIVATE_KEY_FILE="/mnt/hdd/app-data/umbrel/jwt.key"
 JWT_EXPIRATION=3600
