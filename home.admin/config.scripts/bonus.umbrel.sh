@@ -9,6 +9,7 @@
 # - do BITCOIN_P2P_HIDDEN_SERVICE_FILE correct
 # - change port of dashboard from 8080 .. collusion with LND-REST 
 # - change name/password also in USER_FILE if changed outside
+# make sure Tor is on
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -492,6 +493,8 @@ if [ "$1" = "on-docker" ]; then
   sudo usermod -aG docker umbrel
   sudo usermod -aG bitcoin umbrel
 
+  ## PREPARE UMBREL MIDDLEWARE
+
   # download source code
   echo "# *** get the umbrel middleware source code ***"
   sudo rm -rf /home/umbrel/umbrel-middleware 2>/dev/null
@@ -501,8 +504,6 @@ if [ "$1" = "on-docker" ]; then
 
   # build docker image and create constainer
   sudo -u umbrel docker build -t umbrel-middleware .
-  #docker run -d -p 3005:3005 --name umbrel-middleware umbrel-middleware
-  #docker stop umbrel-middleware
 
   # write enviroment file with config
   # see details: https://github.com/getumbrel/umbrel-middleware#step-2-set-environment-variables
@@ -524,7 +525,75 @@ EOF
   sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware/.env
   sudo chmod 700 /home/umbrel/umbrel-middleware/.env
 
+  ## PREPARE UMBREL MANAGER
+
+  # download source code and set to tag release
+  echo "# *** get the umbrel manager source code ***"
+  sudo rm -rf /home/umbrel/umbrel-manager 2>/dev/null
+  sudo -u umbrel git clone https://github.com/getumbrel/umbrel-manager.git /home/umbrel/umbrel-manager
+  cd /home/umbrel/umbrel-manager
+  sudo -u umbrel git reset --hard v0.2.9
+
+  # build docker image and create constainer
+  sudo -u umbrel docker build -t umbrel-manager .
+
+  # prepare needed files for config (if not existing yet)
+  if ! [ -f "/mnt/hdd/app-data/umbrel/update-status.json" ]; then
+    echo -e '{\n"state": "success",\n"progress": 100,\n"description": "",\n"updateTo": ""\n}' > /home/admin/template.tmp
+    sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/update-status.json
+    sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/update-status.json
+  fi
+  if ! [ -f "/mnt/hdd/app-data/umbrel/user.json" ]; then
+    echo -e "{\n\"name\": \"$hostname\",\n\"password\": \"$bitcoinRpcPassword\",\n\"seed\": \"\",\n\"installedApps\": []\n}" > /home/admin/template.tmp
+    sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/user.json
+    sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/user.json
+  fi
+
+  # prepare Config file
+  # see details: https://github.com/getumbrel/umbrel-manager#step-2-set-environment-variables
+  echo "# *** write umbrel manager config ***"
+  cat > /home/admin/umbrel-manager.env <<EOF
+PORT=3006
+DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006"
+USER_FILE="/mnt/hdd/app-data/umbrel/user.json"
+SHUTDOWN_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/shutdown.signal"
+REBOOT_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/reboot.signal"
+MIDDLEWARE_API_URL="http://localhost"
+MIDDLEWARE_API_PORT=3005
+JWT_PUBLIC_KEY_FILE="/mnt/hdd/app-data/umbrel/jwt.pem"
+JWT_PRIVATE_KEY_FILE="/mnt/hdd/app-data/umbrel/jwt.key"
+JWT_EXPIRATION=3600
+DOCKER_COMPOSE_DIRECTORY="/mnt/hdd/app-data/umbrel"
+UMBREL_SEED_FILE="/mnt/hdd/app-data/umbrel/seed.file"
+UMBREL_DASHBOARD_HIDDEN_SERVICE_FILE="/mnt/hdd/tor/web80/hostname"
+ELECTRUM_HIDDEN_SERVICE_FILE="/mnt/hdd/tor/electrs/hostname"
+ELECTRUM_PORT=50001
+BITCOIN_P2P_HIDDEN_SERVICE_FILE="/mnt/hdd/tor/bitcoin8332/hostname"
+BITCOIN_P2P_PORT=8333
+BITCOIN_RPC_HIDDEN_SERVICE_FILE="/mnt/hdd/tor/bitcoin8332/hostname"
+BITCOIN_RPC_PORT=8332
+RPC_USER=$bitcoinRpcUser
+RPC_PASSWORD=$bitcoinRpcPassword
+GITHUB_REPO="getumbrel/umbrel"
+UMBREL_VERSION_FILE="/mnt/hdd/app-data/umbrel/info.json"
+UPDATE_STATUS_FILE="/mnt/hdd/app-data/umbrel/update-status.json"
+UPDATE_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/update.signal"
+UPDATE_LOCK_FILE="/mnt/hdd/app-data/umbrel/update-in-progress.lock"
+BACKUP_STATUS_FILE="/mnt/hdd/app-data/umbrel/backup-status.json"
+TOR_PROXY_IP="127.0.0.1"
+TOR_PROXY_PORT=9050
+EOF
+  sudo mv /home/admin/umbrel-manager.env /home/umbrel/umbrel-manager/.env
+  sudo chown umbrel:umbrel /home/umbrel/umbrel-manager/.env
+  sudo chmod 700 /home/umbrel/umbrel-manager/.env
+
+  ## PREPARE UMBREL DASHBOARD
+
+  # TODO: IMPLEMENT
+
+  ## PREPARE DOCKER-COMPOSE (tie all the container together)
   echo "# *** write umbrel docker-compose for raspiblitz ***"
+
   cat > /home/admin/docker-compose.yml <<EOF
 version: '3.7'
 x-logging: &default-logging
@@ -533,10 +602,24 @@ x-logging: &default-logging
         tag: "{{.Name}}"
 
 services:
+        manager:
+                container_name: manager
+                image: umbrel-manager
+                logging: *default-logging
+                restart: on-failure
+                stop_grace_period: 5m30s
+                volumes:
+                        - /mnt/hdd/app-data/umbrel:/mnt/hdd/app-data/umbrel
+                        - /mnt/hdd/tor:/mnt/hdd/tor
+                env_file:
+                        - /home/umbrel/umbrel-manager/.env
+                ports:
+                        - "3005:3005"
         middleware:
                 container_name: middleware
                 image: umbrel-middleware
                 logging: *default-logging
+                depends_on: [ manager ]
                 command: ["npm", "start"]
                 restart: on-failure
                 volumes:
