@@ -530,7 +530,7 @@ EOF
   # download source code and set to tag release
   echo "# *** get the umbrel manager source code ***"
   sudo rm -rf /home/umbrel/umbrel-manager 2>/dev/null
-  sudo -u umbrel git clone https://github.com/getumbrel/umbrel-manager.git /home/umbrel/umbrel-manager
+  sudo -u umbrel git clone https://github.com/rootzoll/umbrel-manager.git /home/umbrel/umbrel-manager
   cd /home/umbrel/umbrel-manager
   sudo -u umbrel git reset --hard v0.2.9
 
