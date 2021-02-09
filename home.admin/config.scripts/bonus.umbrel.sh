@@ -33,6 +33,28 @@ source /mnt/hdd/raspiblitz.conf
 # status
 if [ "$1" = "status" ]; then
 
+  echo "# *** Umbrel Systemd Docker-Compose ***"
+
+  if [ -f "/etc/systemd/system/umbrel.service" ]; then
+    echo "umbrelService=on"  
+
+    serviceRunning=$(sudo systemctl status umbrel 2>/dev/null | grep -c "active (running)")
+    echo "umbrelRunning=${serviceRunning}"
+    if [ "${serviceRunning}" == "0" ]; then
+      echo "# WARNING: systemd service for umbrel not running"
+      echo "# check --> sudo systemctl status umbrel"
+      echo "# check --> sudo journalctl -u umbrel"
+      echo "# maybe --> sudo systemctl start umbrel"
+      exit 1
+    fi  
+
+  else
+    echo "umbrelService=off"  
+  fi
+
+  echo "# TODO: implement rest of status check"
+  exit 0
+
   echo "# *** Umbrel Middleware -> umbrel-middleware.service ***"
 
   # check if service is installed
