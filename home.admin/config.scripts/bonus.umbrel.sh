@@ -38,15 +38,48 @@ if [ "$1" = "status" ]; then
   if [ -f "/etc/systemd/system/umbrel.service" ]; then
     echo "umbrelService=on"  
 
+    # check systemd service for docker-compose is running
     serviceRunning=$(sudo systemctl status umbrel 2>/dev/null | grep -c "active (running)")
     echo "umbrelRunning=${serviceRunning}"
     if [ "${serviceRunning}" == "0" ]; then
       echo "# WARNING: systemd service for umbrel not running"
       echo "# check --> sudo systemctl status umbrel"
       echo "# check --> sudo journalctl -u umbrel"
-      echo "# maybe --> sudo systemctl start umbrel"
+      echo "# try --> sudo systemctl start umbrel"
       exit 1
     fi  
+
+    # check if single containers are "Up"
+    cd /home/umbrel
+    containerManager=$(sudo -u umbrel docker-compose ps | grep "manager" | grep -c "Up")
+    echo "containerManager=${containerManager}"
+    containerMiddleware=$(sudo -u umbrel docker-compose ps | grep "middleware" | grep -c "Up")
+    echo "containerMiddleware=${containerMiddleware}"
+    if [ ${containerManager} eq 0 ] || [ ${containerMiddleware} eq 0 ]; then
+      echo "# WARNING: systemd serive umbrel is running, but"
+      echo "# docker-compose shows that not all needed containers are UP"
+      echo "# check --> sudo docker-compose -f /home/umbrel/docker-compose.yml ps"
+      echo "# check --> sudo journalctl -u umbrel"
+      exit 1
+    fi
+
+    # check if http services of containers react to ping
+    pingURL="http://127.0.0.1:3005/ping"
+    middlewarePing=$(curl ${pingURL} 2>/dev/null | grep -c "umbrel-middleware-")
+    echo "middlewarePing=${middlewarePing}"
+    if [ "${middlewarePing}" == "0" ]; then
+      echo "# WARNING: middleware nodjs not responding to ping"
+      echo "# check --> curl ${pingURL}"
+      echo "# check --> sudo journalctl -u umbrel-middleware"
+    fi
+    pingURL="http://127.0.0.1:3006/ping"
+    managerPing=$(curl ${pingURL} 2>/dev/null | grep -c "umbrel-manager-")
+    echo "managerPing=${managerPing}"
+    if [ "${managerPing}" == "0" ]; then
+      echo "# WARNING: manager nodjs not responding to ping"
+      echo "# check --> curl ${pingURL}"
+      echo "# check --> sudo journalctl -u umbrel-manager"
+    fi
 
   else
     echo "umbrelService=off"  
@@ -78,7 +111,7 @@ if [ "$1" = "status" ]; then
     fi  
 
   else
-    echo "middlewareService=off"  
+    echo "middlewareService=off"
   fi
 
   echo "# *** Umbrel Manager -> umbrel-manager.service ***"
