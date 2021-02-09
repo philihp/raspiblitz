@@ -553,7 +553,7 @@ EOF
   # see details: https://github.com/getumbrel/umbrel-manager#step-2-set-environment-variables
   echo "# *** write umbrel manager config ***"
   cat > /home/admin/umbrel-manager.env <<EOF
-PORT=3006
+PORT=3005
 DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006"
 USER_FILE="/mnt/hdd/app-data/umbrel/user.json"
 SHUTDOWN_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/shutdown.signal"
@@ -662,6 +662,9 @@ EOF
   sudo chown root:root /etc/systemd/system/umbrel.service
   sudo systemctl enable umbrel.service
   echo "# umbrel service is now enabled"
+
+  sudo ufw allow 3005 comment 'umbrel-test HTTP'
+  sudo ufw allow 3006 comment 'umbrel-test HTTP'
 
   echo "TODO: finish implementation"
   exit 0
