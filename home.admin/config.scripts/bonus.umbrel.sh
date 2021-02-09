@@ -55,7 +55,7 @@ if [ "$1" = "status" ]; then
     echo "containerManager=${containerManager}"
     containerMiddleware=$(sudo -u umbrel docker-compose ps | grep "middleware" | grep -c "Up")
     echo "containerMiddleware=${containerMiddleware}"
-    if [ ${containerManager} eq 0 ] || [ ${containerMiddleware} eq 0 ]; then
+    if [ ${containerManager} -eq 0 ] || [ ${containerMiddleware} -eq 0 ]; then
       echo "# WARNING: systemd serive umbrel is running, but"
       echo "# docker-compose shows that not all needed containers are UP"
       echo "# check --> sudo docker-compose -f /home/umbrel/docker-compose.yml ps"
