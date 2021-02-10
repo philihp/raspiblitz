@@ -30,7 +30,8 @@ fi
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# status
+### STATUS ###
+# region
 if [ "$1" = "status" ]; then
 
   echo "# *** Umbrel Systemd Docker-Compose ***"
@@ -142,8 +143,10 @@ if [ "$1" = "status" ]; then
 
   exit 0
 fi
+# endregion
 
-# switch on
+### ON ###
+# region
 if [ "$1" = "on" ] || [ "$1" = "1" ]; then
 
   # check if umbrel user directory exists
@@ -419,8 +422,10 @@ EOF
 
   exit 0
 fi
+# endregion
 
-# update (for development)
+### UPDATE (for development) ###
+# region
 if [ "$1" = "update" ]; then
 
     # get parameter
@@ -501,8 +506,10 @@ if [ "$1" = "update" ]; then
     echo "# done"
     exit 0
 fi
+# endregion
 
-# switch off
+### OFF ###
+# region
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
@@ -531,10 +538,18 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# needs reboot to activate new setting"
   exit 0
 fi
+# endregion
 
-# install and run manager & middleware in docker
+### ON-DOCKER ###
+# region
 if [ "$1" = "on-docker" ]; then
   
+  ################################
+  # UMBREL USER
+  ################################
+
+  echo "# *** Umbrel User ***"
+
   # create umbrel user
   sudo adduser --disabled-password --gecos "" umbrel
 
@@ -548,7 +563,11 @@ if [ "$1" = "on-docker" ]; then
   sudo usermod -aG docker umbrel
   sudo usermod -aG bitcoin umbrel
 
-  ## PREPARE UMBREL MIDDLEWARE
+  ################################
+  # UMIDDLEWARE
+  ################################
+
+  echo "# *** Umbrel Middleware ***"
 
   # download source code
   echo "# *** get the umbrel middleware source code ***"
@@ -580,10 +599,15 @@ EOF
   sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware/.env
   sudo chmod 700 /home/umbrel/umbrel-middleware/.env
 
-  ## PREPARE UMBREL MANAGER
+
+  ################################
+  # MANAGER
+  ################################
+
+  echo "# *** Umbrel Manager ***"
 
   # download source code and set to tag release
-  echo "# *** get the umbrel manager source code ***"
+  echo "# get the umbrel manager source code ***"
   sudo rm -rf /home/umbrel/umbrel-manager 2>/dev/null
   sudo -u umbrel git clone https://github.com/rootzoll/umbrel-manager.git /home/umbrel/umbrel-manager
   cd /home/umbrel/umbrel-manager
@@ -642,11 +666,10 @@ EOF
   sudo chown umbrel:umbrel /home/umbrel/umbrel-manager/.env
   sudo chmod 700 /home/umbrel/umbrel-manager/.env
 
-  ## PREPARE UMBREL DASHBOARD
+  ################################
+  # DOCKER COMPOSE
+  ################################
 
-  # TODO: IMPLEMENT
-
-  ## PREPARE DOCKER-COMPOSE (tie all the container together)
   echo "# *** write umbrel docker-compose for raspiblitz ***"
 
   cat > /home/admin/docker-compose.yml <<EOF
@@ -718,12 +741,72 @@ EOF
   sudo systemctl enable umbrel.service
   echo "# umbrel service is now enabled"
 
+  ################################
+  # DASHBOARD (hosted thru nginx)
+  ################################
+
+  echo "# *** Umbrel Dashboard -> umbrel-dashboard.service ***"
+
+  # download source code and set to tag release
+  echo "# *** get the umbrel dashboard source code ***"
+  sudo rm -rf /home/umbrel/umbrel-dashboard 2>/dev/null
+  sudo -u umbrel git clone https://github.com/rootzoll/umbrel-dashboard.git /home/umbrel/umbrel-dashboard
+  cd /home/umbrel/umbrel-dashboard
+  sudo -u umbrel git reset --hard v0.3.15
+
+  # install
+  echo "# *** run npm install ***"
+  cd /home/umbrel/umbrel-dashboard
+  sudo -u umbrel npm install
+  if ! [ $? -eq 0 ]; then
+      echo "error='npm install failed of umbrel-dashboard'"
+      exit 1
+  else
+      echo "# OK - install done"
+  fi
+
+  # prepare Config file
+  # see details: https://github.com/getumbrel/umbrel-dashboard#step-2-set-environment-variables
+  echo "# *** write umbrel dashboard config ***"
+  cat > /home/admin/umbrel-dashboard.env <<EOF
+VUE_APP_MANAGER_API_URL="http://localhost:3005"
+VUE_APP_MIDDLEWARE_API_URL="http://localhost:3006"
+EOF
+  sudo mv /home/admin/umbrel-dashboard.env /home/umbrel/umbrel-dashboard/.env
+  sudo chown umbrel:umbrel /home/umbrel/umbrel-dashboard/.env
+  sudo chmod 700 /home/umbrel/umbrel-dashboard/.env
+
+  # npm build
+  echo "# *** run npm build ***"
+  cd /home/umbrel/umbrel-dashboard
+  sudo -u umbrel npm run-script build
+  if ! [ $? -eq 0 ]; then
+      echo "error='npm build failed of umbrel-dashboard'"
+      exit 1
+  fi
+  echo "# OK - build done"
+
+  ################################
+  # FINAL SETTINGS
+  ################################
+
+  echo "# *** Final Settings for Umbrel ***"
+
+  # open firewall for docker services (testing umbrel)
   sudo ufw allow 3005 comment 'umbrel-test HTTP'
   sudo ufw allow 3006 comment 'umbrel-test HTTP'
 
-  echo "TODO: finish implementation"
+  # start services when not in recovery
+  if [ "${setupStep}" == "100" ]; then
+    sudo systemctl start umbrel
+    echo "# OK - the umbrel service got started"
+  else
+    echo "# OK - will start after reboot"
+  fi
+
   exit 0
 fi
+# endregion
 
 echo "error='unknown parameter'"
 exit 1
