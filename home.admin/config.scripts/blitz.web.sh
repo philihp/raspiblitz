@@ -236,6 +236,8 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl stop nginx
   sudo systemctl disable nginx >/dev/null
 
+  # clean some resources
+  sudo rm /etc/nginx/sites-available/public.conf
 
 ###################
 # LISTEN
