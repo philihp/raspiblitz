@@ -452,13 +452,8 @@ if [ "$1" = "update" ]; then
       exit 1
     fi
 
-    if [ "${repo}" != "dashboard" ]; then
-      echo "# stopping systemd service" 
-      sudo systemctl stop umbrel-${repo}
-    fi
-
     echo "# checksum of pre-update package.json "
-    preChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
+    preChecksum=$(sudo find /home/umbrel/umbrel-${repo}/package.json -type f -exec md5sum {} \; | md5sum)
     echo "# --> ${preChecksum}"
 
     echo "# updating from: github.com/${user}/umbrel-${repo} branch(${branch})"
@@ -487,17 +482,21 @@ if [ "$1" = "update" ]; then
     postChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
     echo "# --> ${postChecksum}"
 
-    echo "# check if update of dependencies is needed"
-    if [ "${preChecksum}" = "${postChecksum}" ]; then
-      echo "# --> no new dependencies"
-    else
-      echo "# --> change detected --> running npm install"
-      sudo -u umbrel npm install
-    fi
-
+    # update dashboard
     if [ "${repo}" = "dashboard" ]; then
-      echo "# *** run npm build ***"
+
+      echo "### UPDATE DASHBOARD MANAGER ### "
       cd /home/umbrel/umbrel-dashboard
+
+      echo "# check if update of dependencies is needed"
+      if [ "${preChecksum}" = "${postChecksum}" ]; then
+        echo "# --> no new dependencies"
+      else
+        echo "# --> change detected --> running npm install"
+        sudo -u umbrel npm install
+      fi
+
+      echo "# *** run npm build ***"
       sudo -u umbrel npm run-script build
       if ! [ $? -eq 0 ]; then
         echo "error='npm build failed of umbrel-dashboard'"
@@ -505,13 +504,13 @@ if [ "$1" = "update" ]; then
       fi
       sudo chmod 755 -R /home/umbrel/umbrel-dashboard/dist
       echo "# OK - build done"
-    else
-      echo "# starting systemd umbrel-${repo}"
-      sudo systemctl start umbrel-${repo} 2>/dev/null    
+      exit 0
+
     fi
-    
-    echo "# done"
-    exit 0
+
+    echo "# stopping systemd service" 
+    sudo systemctl stop umbrel    
+
 fi
 # endregion
 
