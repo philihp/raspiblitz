@@ -508,8 +508,28 @@ if [ "$1" = "update" ]; then
 
     fi
 
-    echo "# stopping systemd service" 
-    sudo systemctl stop umbrel    
+    echo "# stopping systemd service (docker-compose)" 
+    sudo systemctl stop umbrel
+
+    # update middleware
+    if [ "${repo}" = "middleware" ]; then
+
+      echo "# deleting old docker image of middleware"
+      sudo -u umbrel docker image rm -f $(sudo -u umbrel docker images 'umbrel-middleware' -a -q) 2>/dev/null
+
+      echo "# building new docker image of middleware with updated code"
+      cd /home/umbrel/umbrel-middleware
+      sudo -u umbrel docker build -t umbrel-middleware .
+
+    fi
+
+    # update manager
+    if [ "${repo}" = "manager" ]; then
+    fi
+
+
+    echo "# starting systemd service (docker-compose)" 
+    sudo systemctl start umbrel
 
 fi
 # endregion
