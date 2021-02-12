@@ -525,6 +525,7 @@ if [ "$1" = "update" ]; then
 
     # update manager
     if [ "${repo}" = "manager" ]; then
+      echo "# TODO: implement"
     fi
 
 
