@@ -520,18 +520,24 @@ if [ "$1" = "update" ]; then
       echo "# building new docker image of middleware with updated code"
       cd /home/umbrel/umbrel-middleware
       sudo -u umbrel docker build -t umbrel-middleware .
-
     fi
 
     # update manager
     if [ "${repo}" = "manager" ]; then
-      echo "# TODO: implement"
-    fi
 
+      echo "# deleting old docker image of manager"
+      sudo -u umbrel docker image rm -f $(sudo -u umbrel docker images 'umbrel-manager' -a -q) 2>/dev/null
+
+      echo "# building new docker image of manager with updated code"
+      cd /home/umbrel/umbrel-manager
+      sudo -u umbrel docker build -t umbrel-manager .
+    fi
 
     echo "# starting systemd service (docker-compose)" 
     sudo systemctl start umbrel
 
+    echo "# OK your container should now run the latest code from ${user}/${repo} branch ${branch}" 
+    exit 0
 fi
 # endregion
 
