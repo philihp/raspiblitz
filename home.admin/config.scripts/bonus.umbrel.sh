@@ -153,10 +153,11 @@ if [ "$1" = "logs" ]; then
   containerManager=$(sudo -u umbrel docker ps | grep "umbrel-middleware" | cut -d " " -f1)
   containerMiddleware=$(sudo -u umbrel docker ps | grep "umbrel-middleware" | cut -d " " -f1)
 
-  echo "# *** Umbrel Logs ***"
-  echo "# manager    --> docker logs ${containerManager}" 
-  echo "# middleware --> docker logs ${containerMiddleware}"
-  echo "# dashboard  --> "
+  echo "### HOW TO GET UMBREL LOGS:"
+  echo "# manager    --> docker logs -n 100 --follow ${containerManager}" 
+  echo "# middleware --> docker logs -n 100 --follow ${containerMiddleware}"
+  echo "# dashboard  --> sudo tail -fn 100 /var/log/nginx/access.log"
+  echo "#            --> sudo tail -fn 100 /var/log/nginx/error.log"
   exit 0
 fi
 # endregion
