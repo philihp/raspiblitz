@@ -150,7 +150,7 @@ fi
 if [ "$1" = "logs" ]; then
 
   # get docker container ids
-  containerManager=$(sudo -u umbrel docker ps | grep "umbrel-middleware" | cut -d " " -f1)
+  containerManager=$(sudo -u umbrel docker ps | grep "umbrel-manager" | cut -d " " -f1)
   containerMiddleware=$(sudo -u umbrel docker ps | grep "umbrel-middleware" | cut -d " " -f1)
 
   echo "### HOW TO GET UMBREL LOGS:"
