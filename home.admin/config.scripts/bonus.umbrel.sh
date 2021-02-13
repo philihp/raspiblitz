@@ -342,7 +342,7 @@ services:
                 command: ["npm", "start"]
                 restart: on-failure
                 volumes:
-                        - /mnt/hdd/lnd:/lnd
+                        - /mnt/hdd/lnd:/mnt/hdd/lnd
                         - /mnt/hdd/app-data/umbrel:/mnt/hdd/app-data/umbrel
                         - /mnt/hdd/app-data/lnd:/mnt/hdd/app-data/lnd
                 env_file:
@@ -450,9 +450,18 @@ EOF
   # open firewall for docker services (testing umbrel)
   sudo ufw allow 3005 comment 'umbrel-test HTTP'
   sudo ufw allow 3006 comment 'umbrel-test HTTP'
+  sudo ufw allow from 10.21.21.0/24 comment 'umbrel-docker-network'
+
+  echo "# configuring bitcoind ..."
+  sudo systemctl stop bitcoind 2>/dev/null
+  echo "" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  echo "# serve RPC on docker network & allow umbrel-middleware" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  echo "rpcallowip=10.21.21.5/24" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  echo "main.rpcbind=10.21.21.1:8332" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
 
   # start services when not in recovery
   if [ "${setupStep}" == "100" ]; then
+    sudo systemctl start bitcoind
     sudo systemctl start umbrel
     echo "# OK - the umbrel service got started"
   else
@@ -579,6 +588,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^umbrel=.*/umbrel=off/g" /mnt/hdd/raspiblitz.conf
+
+  # remove bitcoin.conf entries
+  sudo sed -i "s/^# serve RPC on docker.*//g" /mnt/hdd/bitcoin/bitcoin.conf
+  sudo sed -i "s/^rpcallowip=10.*//g" /mnt/hdd/bitcoin/bitcoin.conf
+  sudo sed -i "s/^main.rpcbind=10.*//g" /mnt/hdd/bitcoin/bitcoin.conf
 
   # uninstall umbrel-middelware
   isInstalled=$(sudo ls /etc/systemd/system/umbrel-middleware.service 2>/dev/null | grep -c 'umbrel-middleware.service')
