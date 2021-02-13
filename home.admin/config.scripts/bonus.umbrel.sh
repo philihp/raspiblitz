@@ -16,6 +16,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# umbrel API & dashboard integration"
  echo "# bonus.umbrel.sh on"
  echo "# bonus.umbrel.sh status"
+ echo "# bonus.umbrel.sh logs"
  echo "# bonus.umbrel.sh update [manager|middleware|dashboard] [githubUser] [githubBranch]"
  echo "# bonus.umbrel.sh off"
  echo "####################################"
@@ -140,6 +141,22 @@ if [ "$1" = "status" ]; then
     echo "managerService=off"  
   fi
 
+  exit 0
+fi
+# endregion
+
+### LOGS ###
+# region
+if [ "$1" = "logs" ]; then
+
+  # get docker container ids
+  containerManager=$(sudo -u umbrel docker ps | grep "umbrel-middleware" | cut -d " " -f1)
+  containerMiddleware=$(sudo -u umbrel docker ps | grep "umbrel-middleware" | cut -d " " -f1)
+
+  echo "# *** Umbrel Logs ***"
+  echo "# manager    --> docker logs ${containerManager}" 
+  echo "# middleware --> docker logs ${containerMiddleware}"
+  echo "# dashboard  --> "
   exit 0
 fi
 # endregion
