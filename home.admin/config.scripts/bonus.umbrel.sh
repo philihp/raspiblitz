@@ -331,6 +331,9 @@ services:
                         - /home/umbrel/umbrel-manager/.env
                 ports:
                         - "3005:3005"
+                networks:
+                    default:
+                        ipv4_address: 10.21.21.4
         middleware:
                 container_name: middleware
                 image: umbrel-middleware
@@ -346,6 +349,16 @@ services:
                         - /home/umbrel/umbrel-middleware/.env
                 ports:
                         - "3006:3006"
+                networks:
+                    default:
+                        ipv4_address: 10.21.21.5
+networks:
+    default:
+        name: umbrel_main_network
+        ipam:
+            driver: default
+            config:
+                - subnet: "$NETWORK_IP/24"
 EOF
   sudo mv /home/admin/docker-compose.yml /home/umbrel/docker-compose.yml
   sudo chown umbrel:umbrel /home/umbrel/docker-compose.yml
