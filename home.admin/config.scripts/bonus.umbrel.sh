@@ -223,10 +223,10 @@ if [ "$1" = "on" ]; then
   cat > /home/admin/umbrel-middleware.env <<EOF
 PORT=3006
 DEVICE_HOSTS="http://localhost:3005,http://127.0.0.1:3005"
-BITCOIN_HOST=127.0.0.1
+BITCOIN_HOST=host.docker.internal
 RPC_USER=$bitcoinRpcUser
 RPC_PASSWORD=$bitcoinRpcPassword
-LND_HOST=127.0.0.1
+LND_HOST=host.docker.internal
 TLS_FILE="/mnt/hdd/lnd/tls.cert"
 LND_PORT=10009
 LND_NETWORK=mainnet
@@ -297,7 +297,7 @@ UPDATE_STATUS_FILE="/mnt/hdd/app-data/umbrel/update-status.json"
 UPDATE_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/update.signal"
 UPDATE_LOCK_FILE="/mnt/hdd/app-data/umbrel/update-in-progress.lock"
 BACKUP_STATUS_FILE="/mnt/hdd/app-data/umbrel/backup-status.json"
-TOR_PROXY_IP="127.0.0.1"
+TOR_PROXY_IP="host.docker.internal"
 TOR_PROXY_PORT=9050
 EOF
   sudo mv /home/admin/umbrel-manager.env /home/umbrel/umbrel-manager/.env
@@ -341,6 +341,7 @@ services:
                 volumes:
                         - /mnt/hdd/lnd:/lnd
                         - /mnt/hdd/app-data/umbrel:/mnt/hdd/app-data/umbrel
+                        - /mnt/hdd/app-data/lnd:/mnt/hdd/app-data/lnd
                 env_file:
                         - /home/umbrel/umbrel-middleware/.env
                 ports:
