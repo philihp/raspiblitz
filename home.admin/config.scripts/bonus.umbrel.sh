@@ -358,7 +358,7 @@ networks:
         ipam:
             driver: default
             config:
-                - subnet: "$NETWORK_IP/24"
+                - subnet: "10.21.21.0/24"
 EOF
   sudo mv /home/admin/docker-compose.yml /home/umbrel/docker-compose.yml
   sudo chown umbrel:umbrel /home/umbrel/docker-compose.yml
