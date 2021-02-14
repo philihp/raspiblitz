@@ -583,7 +583,7 @@ if [ "$1" = "update" ]; then
     sudo systemctl start umbrel
 
     echo "# OK your container should now run the latest code from ${user}/${repo} branch ${branch}" 
-    /home/admin/config.scripts/bonus.umbrel.sh logs
+    echo "# call for logs info --> /home/admin/config.scripts/bonus.umbrel.sh logs" 
     exit 0
 fi
 # endregion
