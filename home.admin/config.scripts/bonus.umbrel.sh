@@ -453,11 +453,16 @@ EOF
   sudo ufw allow from 10.21.21.0/24 comment 'umbrel-docker-network'
 
   echo "# configuring bitcoind ..."
-  sudo systemctl stop bitcoind 2>/dev/null
-  echo "" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
-  echo "# serve RPC on docker network & allow umbrel-middleware" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
-  echo "rpcallowip=10.21.21.5/24" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
-  echo "main.rpcbind=10.21.21.1:8332" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  alreadyDone=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "# serve RPC on docker")
+  if [ ${alreadyDone} -eq 0 ]; then
+    sudo systemctl stop bitcoind 2>/dev/null
+    echo "" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    echo "# serve RPC on docker network & allow umbrel-middleware" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    echo "rpcallowip=10.21.21.0/24" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    echo "main.rpcbind=10.21.21.1:8332" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  else
+    echo "# ... ok already configured"
+  fi
 
   # start services when not in recovery
   if [ "${setupStep}" == "100" ]; then
@@ -578,6 +583,7 @@ if [ "$1" = "update" ]; then
     sudo systemctl start umbrel
 
     echo "# OK your container should now run the latest code from ${user}/${repo} branch ${branch}" 
+    /home/admin/config.scripts/bonus.umbrel.sh logs
     exit 0
 fi
 # endregion
