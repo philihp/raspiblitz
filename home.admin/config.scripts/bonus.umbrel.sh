@@ -231,6 +231,7 @@ TLS_FILE="/mnt/hdd/lnd/tls.cert"
 LND_PORT=10009
 LND_NETWORK=mainnet
 MACAROON_DIR="/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/"
+JWT_PUBLIC_KEY_FILE="/mnt/hdd/app-data/umbrel/jwt.pem"
 JWT_PRIVATE_KEY_FILE="/mnt/hdd/app-data/umbrel/jwt.key"
 EOF
   sudo mv /home/admin/umbrel-middleware.env /home/umbrel/umbrel-middleware/.env
@@ -464,6 +465,17 @@ EOF
     echo "# ... ok already configured"
   fi
 
+  echo "# configuring lnd ..."
+  alreadyDone=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c "rpclisten=10.21.21.1:10009")
+  if [ ${alreadyDone} -eq 0 ]; then
+    # simply add the line to the LND conf
+    sudo sed -i "13itlsextraip=10.21.21.1:10009" /mnt/hdd/lnd/lnd.conf
+    /home/admin/config.scripts/lnd.tlscert.sh ip-add 10.21.21.5
+    /home/admin/config.scripts/lnd.tlscert.sh refresh
+  else
+    echo "# ... ok already configured"
+  fi
+
   # start services when not in recovery
   if [ "${setupStep}" == "100" ]; then
     sudo systemctl start bitcoind
@@ -599,6 +611,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^# serve RPC on docker.*//g" /mnt/hdd/bitcoin/bitcoin.conf
   sudo sed -i "s/^rpcallowip=10.*//g" /mnt/hdd/bitcoin/bitcoin.conf
   sudo sed -i "s/^main.rpcbind=10.*//g" /mnt/hdd/bitcoin/bitcoin.conf
+
+  # remove lnd.conf entries
+  sudo sed -i "/tlsextraip=10.21.21.1:10009/d" /mnt/hdd/lnd/lnd.conf
+  /home/admin/config.scripts/lnd.tlscert.sh ip-remove 10.21.21.5
 
   # uninstall umbrel-middelware
   isInstalled=$(sudo ls /etc/systemd/system/umbrel-middleware.service 2>/dev/null | grep -c 'umbrel-middleware.service')
