@@ -468,7 +468,7 @@ EOF
   echo "# configuring lnd ..."
   alreadyDone=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c "rpclisten=10.21.21.1:10009")
   if [ ${alreadyDone} -eq 0 ]; then
-    # simply add the line to the LND conf
+    sudo systemctl stop lnd 2>/dev/null
     sudo sed -i "13itlsextraip=10.21.21.1:10009" /mnt/hdd/lnd/lnd.conf
     /home/admin/config.scripts/lnd.tlscert.sh ip-add 10.21.21.5
     /home/admin/config.scripts/lnd.tlscert.sh refresh
@@ -479,6 +479,7 @@ EOF
   # start services when not in recovery
   if [ "${setupStep}" == "100" ]; then
     sudo systemctl start bitcoind
+    sudo systemctl start lnd
     sudo systemctl start umbrel
     echo "# OK - the umbrel service got started"
   else
