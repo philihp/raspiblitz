@@ -261,11 +261,12 @@ EOF
     sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/update-status.json
     sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/update-status.json
   fi
-  if ! [ -f "/mnt/hdd/app-data/umbrel/user.json" ]; then
-    echo -e "{\n\"name\": \"$hostname\",\n\"password\": \"$bitcoinRpcPassword\",\n\"seed\": \"\",\n\"installedApps\": []\n}" > /home/admin/template.tmp
-    sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/user.json
-    sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/user.json
-  fi
+  #
+  #if ! [ -f "/mnt/hdd/app-data/umbrel/user.json" ]; then
+  #  echo -e "{\n\"name\": \"$hostname\",\n\"password\": \"$bitcoinRpcPassword\",\n\"seed\": \"\",\n\"installedApps\": []\n}" > /home/admin/template.tmp
+  #  sudo mv /home/admin/template.tmp /mnt/hdd/app-data/umbrel/user.json
+  #  sudo chown umbrel:umbrel /mnt/hdd/app-data/umbrel/user.json
+  #fi
 
   # prepare Config file
   # see details: https://github.com/getumbrel/umbrel-manager#step-2-set-environment-variables
@@ -476,16 +477,7 @@ EOF
     echo "# ... ok already configured"
   fi
 
-  # start services when not in recovery
-  if [ "${setupStep}" == "100" ]; then
-    sudo systemctl start bitcoind
-    sudo systemctl start lnd
-    sudo systemctl start umbrel
-    echo "# OK - the umbrel service got started"
-  else
-    echo "# OK - will start after reboot"
-  fi
-
+  echo "# OK - reboot is needed"
   exit 0
 fi
 # endregion
