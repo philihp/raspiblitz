@@ -1,5 +1,6 @@
 #!/bin/bash
 
+############
 # NOTES:
 # how to ssh into a umbrel node for comparing: https://github.com/getumbrel/umbrel-os#-ssh
 
