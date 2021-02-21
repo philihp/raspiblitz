@@ -618,14 +618,6 @@ if [ "$1" = "patch" ]; then
   postChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
   echo "# --> ${postChecksum}"
 
-  echo "# check if update of dependencies is needed"
-  if [ "${preChecksum}" = "${postChecksum}" ]; then
-    echo "# --> no new dependencies"
-  else
-    echo "# --> change detected --> running npm install"
-    sudo -u umbrel npm install
-  fi
-
   # update dashboard
   if [ "${repo}" = "dashboard" ]; then
 
