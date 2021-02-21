@@ -655,7 +655,8 @@ if [ "$1" = "patch" ]; then
   echo "# *** copy new app files into container ***"
   cd /home/umbrel/umbrel-${repo}
   sudo -u umbrel docker cp . ${repo}:/app
-  docker exec -it manager yarn install --production  
+  docker exec -it manager yarn install --production
+  docker restart ${repo}
 
   echo "# OK your container should now run the latest code" 
   echo "# call for logs info --> /home/admin/config.scripts/bonus.umbrel.sh logs" 
