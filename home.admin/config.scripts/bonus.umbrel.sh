@@ -656,6 +656,7 @@ if [ "$1" = "patch" ]; then
   cd /home/umbrel/umbrel-${repo}
   sudo -u umbrel docker cp . ${repo}:/app
   docker exec -it manager yarn install --production
+  docker commit ${repo}
   docker restart ${repo}
 
   echo "# OK your container should now run the latest code" 
