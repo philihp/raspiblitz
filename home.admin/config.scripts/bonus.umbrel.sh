@@ -19,6 +19,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# bonus.umbrel.sh status"
  echo "# bonus.umbrel.sh logs"
  echo "# bonus.umbrel.sh update [manager|middleware|dashboard] [githubUser] [githubBranch]"
+ echo "# bonus.umbrel.sh patch [manager|middleware|dashboard]"
  echo "# bonus.umbrel.sh off"
  echo "####################################"
  echo "# To follow logs:"
@@ -593,6 +594,75 @@ if [ "$1" = "update" ]; then
     exit 0
 fi
 # endregion
+
+### PATCH (for development) ###
+# region
+if [ "$1" = "patch" ]; then
+
+  # get & check parameter
+  repo=$2
+  if [ "${repo}" != "middleware" ] && [ "${repo}" != "manager" ] && [ "${repo}" != "dashboard" ]; then
+    echo "error='wrong parameter'"
+    exit 1
+  fi
+
+  cd /home/umbrel/umbrel-${repo}
+  echo "# checksum of pre-update package.json "
+  preChecksum=$(sudo find /home/umbrel/umbrel-${repo}/package.json -type f -exec md5sum {} \; | md5sum)
+  echo "# --> ${preChecksum}"
+
+  sudo -u umbrel git fetch
+  sudo -u umbrel git pull
+
+  echo "# checksum of post-update package.json "
+  postChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
+  echo "# --> ${postChecksum}"
+
+  echo "# check if update of dependencies is needed"
+  if [ "${preChecksum}" = "${postChecksum}" ]; then
+    echo "# --> no new dependencies"
+  else
+    echo "# --> change detected --> running npm install"
+    sudo -u umbrel npm install
+  fi
+
+  # update dashboard
+  if [ "${repo}" = "dashboard" ]; then
+
+    echo "### UPDATE DASHBOARD MANAGER ### "
+    cd /home/umbrel/umbrel-dashboard
+
+    echo "# check if update of dependencies is needed"
+    if [ "${preChecksum}" = "${postChecksum}" ]; then
+      echo "# --> no new dependencies"
+    else
+      echo "# --> change detected --> running npm install"
+      sudo -u umbrel npm install
+    fi
+
+    echo "# *** run npm build ***"
+    sudo -u umbrel npm run-script build
+    if ! [ $? -eq 0 ]; then
+      echo "error='npm build failed of umbrel-dashboard'"
+      exit 1
+    fi
+    sudo chmod 755 -R /home/umbrel/umbrel-dashboard/dist
+    echo "# OK - build done"
+    exit 0
+  fi
+
+  # update manager or middleware
+  echo "# *** copy new app files into container ***"
+  cd /home/umbrel/umbrel-${repo}
+  sudo -u umbrel docker cp . ${repo}:/app
+  docker exec -it manager yarn install --production  
+
+  echo "# OK your container should now run the latest code" 
+  echo "# call for logs info --> /home/admin/config.scripts/bonus.umbrel.sh logs" 
+  exit 0
+fi
+# endregion
+
 
 ### OFF ###
 # region
