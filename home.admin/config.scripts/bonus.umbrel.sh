@@ -615,7 +615,7 @@ if [ "$1" = "patch" ]; then
   sudo -u umbrel git pull
 
   echo "# checksum of post-update package.json "
-  postChecksum=$(sudo find /home/umbrel/umbrel-manager/package.json -type f -exec md5sum {} \; | md5sum)
+  postChecksum=$(sudo find /home/umbrel/umbrel-${repo}/package.json -type f -exec md5sum {} \; | md5sum)
   echo "# --> ${postChecksum}"
 
   # update dashboard
