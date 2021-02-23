@@ -8,9 +8,8 @@
 # - if password B is changed from RaspBlitz ... also change in middleware, manager & reset user
 # - create dashboard tor servive and link in manager config 
 # - do BITCOIN_P2P_HIDDEN_SERVICE_FILE correct
-# - change port of dashboard from 8080 .. collusion with LND-REST 
-# - change name/password also in USER_FILE if changed outside
-# make sure Tor is on
+# - make sure Tor is on
+# - find better way to set DEVICE_HOSTS or update localip on every start
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
