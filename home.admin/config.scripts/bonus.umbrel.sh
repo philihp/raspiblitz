@@ -657,6 +657,9 @@ if [ "$1" = "patch" ]; then
   cd /home/umbrel/umbrel-${repo}
   sudo -u umbrel docker cp . ${repo}:/app
   docker exec -it manager yarn install --production
+  if [ "${repo}" = "manager" ]; then
+    sudo -u umbrel docker cp /home/admin/assets/raspiblitz.js manager:/app
+  fi
   
   echo "# *** docker comitting changes to image & restart container ***"
   docker commit ${repo}
