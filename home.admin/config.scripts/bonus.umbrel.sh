@@ -86,8 +86,6 @@ if [ "$1" = "status" ]; then
       echo "# check --> sudo journalctl -u umbrel-manager"
     fi
 
-    echo "localip=${localip}"
-
   else
     echo "umbrelService=off"  
   fi
@@ -228,7 +226,7 @@ if [ "$1" = "on" ]; then
   echo "# *** write umbrel middleware config ***"
   cat > /home/admin/umbrel-middleware.env <<EOF
 PORT=3006
-DEVICE_HOSTS="http://localhost:3005,http://127.0.0.1:3005"
+DEVICE_HOSTS="http://localhost:3005,http://127.0.0.1:3005,http://{localip}"
 BITCOIN_HOST=10.21.21.1
 RPC_USER=$bitcoinRpcUser
 RPC_PASSWORD=$bitcoinRpcPassword
@@ -278,7 +276,7 @@ EOF
   echo "# *** write umbrel manager config ***"
   cat > /home/admin/umbrel-manager.env <<EOF
 PORT=3005
-DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006"
+DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006,http://{localip}"
 USER_FILE="/mnt/hdd/app-data/umbrel/user.json"
 SHUTDOWN_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/shutdown.signal"
 REBOOT_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/reboot.signal"
