@@ -157,8 +157,8 @@ if [ "$1" = "logs" ]; then
   containerMiddleware=$(sudo -u umbrel docker ps | grep "umbrel-middleware" | cut -d " " -f1)
 
   echo "### HOW TO GET UMBREL LOGS:"
-  echo "# manager    --> docker logs -n 100 --follow ${containerManager}" 
-  echo "# middleware --> docker logs -n 100 --follow ${containerMiddleware}"
+  echo "# manager    --> docker logs -n 100 --follow manager" 
+  echo "# middleware --> docker logs -n 100 --follow middleware"
   echo "# dashboard  --> sudo tail -fn 100 /var/log/nginx/access.log"
   echo "#            --> sudo tail -fn 100 /var/log/nginx/error.log"
   exit 0
@@ -225,7 +225,7 @@ if [ "$1" = "on" ]; then
   echo "# *** write umbrel middleware config ***"
   cat > /home/admin/umbrel-middleware.env <<EOF
 PORT=3006
-DEVICE_HOSTS="http://localhost:3005,http://127.0.0.1:3005,http://{localip}"
+DEVICE_HOSTS="http://localhost:3005,http://127.0.0.1:3005,http://$localip"
 BITCOIN_HOST=10.21.21.1
 RPC_USER=$bitcoinRpcUser
 RPC_PASSWORD=$bitcoinRpcPassword
@@ -275,7 +275,7 @@ EOF
   echo "# *** write umbrel manager config ***"
   cat > /home/admin/umbrel-manager.env <<EOF
 PORT=3005
-DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006,http://{localip}"
+DEVICE_HOSTS="http://localhost:3006,http://127.0.0.1:3006,http://$localip"
 USER_FILE="/mnt/hdd/app-data/umbrel/user.json"
 SHUTDOWN_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/shutdown.signal"
 REBOOT_SIGNAL_FILE="/mnt/hdd/app-data/umbrel/reboot.signal"
@@ -599,7 +599,7 @@ if [ "$1" = "update" ]; then
     sudo systemctl start umbrel
 
     echo "# OK your container should now run the latest code from ${user}/${repo} branch ${branch}" 
-    echo "# call for logs info --> /home/admin/config.scripts/bonus.umbrel.sh logs" 
+    echo "# call for logs info --> docker logs -n 100 --follow ${repo}" 
     exit 0
 fi
 # endregion
