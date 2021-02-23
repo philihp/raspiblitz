@@ -312,6 +312,7 @@ EOF
   echo "# creating user ..."
   sudo -u umbrel docker run --name manager -d umbrel-manager
   sleep 6
+  sudo -u umbrel docker cp /home/admin/assets/raspiblitz.js manager:/app
   docker exec -it manager node /app/raspiblitz.js init-user ${hostname} ${bitcoinRpcPassword}
   docker commit manager
   docker rm -f manager
