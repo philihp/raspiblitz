@@ -5,7 +5,7 @@
 # how to ssh into a umbrel node for comparing: https://github.com/getumbrel/umbrel-os#-ssh
 
 # TODOS:
-# - if password B is changed from RaspBlitz ... also change in umbrel-middleware & manager
+# - if password B is changed from RaspBlitz ... also change in middleware, manager & reset user
 # - create dashboard tor servive and link in manager config 
 # - do BITCOIN_P2P_HIDDEN_SERVICE_FILE correct
 # - change port of dashboard from 8080 .. collusion with LND-REST 
@@ -31,6 +31,8 @@ fi
 # check and load raspiblitz config & info file
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
+
+source <(/home/admin/config.scripts/internet.sh status)
 
 ### STATUS ###
 # region
@@ -83,6 +85,8 @@ if [ "$1" = "status" ]; then
       echo "# check --> curl ${pingURL}"
       echo "# check --> sudo journalctl -u umbrel-manager"
     fi
+
+    echo "localip=${localip}"
 
   else
     echo "umbrelService=off"  
@@ -240,7 +244,6 @@ EOF
   sudo chown umbrel:umbrel /home/umbrel/umbrel-middleware/.env
   sudo chmod 700 /home/umbrel/umbrel-middleware/.env
 
-
   ################################
   # MANAGER
   ################################
@@ -307,6 +310,14 @@ EOF
   sudo mv /home/admin/umbrel-manager.env /home/umbrel/umbrel-manager/.env
   sudo chown umbrel:umbrel /home/umbrel/umbrel-manager/.env
   sudo chmod 700 /home/umbrel/umbrel-manager/.env
+
+  # start manager once to init user
+  echo "# creating user ..."
+  sudo -u umbrel docker run --name manager -d umbrel-manager
+  sleep 6
+  docker exec -it manager node /app/raspiblitz.js init-user ${hostname} ${bitcoinRpcPassword}
+  docker commit manager
+  docker rm -f manager
 
   ################################
   # DOCKER COMPOSE
